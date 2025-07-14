@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Curricular de Farmacia</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .semester-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .semester {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            width: 300px;
+            transition: transform 0.3s ease;
+        }
+        
+        .semester:hover {
+            transform: translateY(-5px);
+        }
+        
+        .semester-title {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .course {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .course:hover {
+            background-color: #e9f7fe;
+            border-left-color: #2980b9;
+        }
+        
+        .course-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .course-credits {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .course-req {
+            font-size: 0.8em;
+            color: #e74c3c;
+            display: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        #searchInput {
+            padding: 10px;
+            width: 60%;
+            max-width: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .highlight {
+            background-color: yellow;
+        }
+        
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .filter-btn.active {
+            background-color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .semester {
+                width: 100%;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Malla Curricular de Farmacia</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar asignatura..." onkeyup="searchCourses()">
+    </div>
+    
+    <div class="filter-container">
+        <button class="filter-btn active" onclick="filterSemesters('all')">Todos</button>
+        <button class="filter-btn" onclick="filterSemesters('1')">Semestre 1</button>
+        <button class="filter-btn" onclick="filterSemesters('2')">Semestre 2</button>
+        <button class="filter-btn" onclick="filterSemesters('3')">Semestre 3</button>
+        <button class="filter-btn" onclick="filterSemesters('4')">Semestre 4</button>
+        <button class="filter-btn" onclick="filterSemesters('5')">Semestre 5</button>
+        <button class="filter-btn" onclick="filterSemesters('6')">Semestre 6</button>
+        <button class="filter-btn" onclick="filterSemesters('7')">Semestre 7</button>
+        <button class="filter-btn" onclick="filterSemesters('8')">Semestre 8</button>
+        <button class="filter-btn" onclick="filterSemesters('9')">Semestre 9</button>
+        <button class="filter-btn" onclick="filterSemesters('10')">Semestre 10</button>
+    </div>
+    
+    <div id="semestersContainer" class="semester-container">
+        <!-- Los semestres se generarán dinámicamente con JavaScript -->
+    </div>
+    
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <p><strong>Créditos:</strong> <span id="modalCredits"></span></p>
+            <p><strong>Semestre:</strong> <span id="modalSemester"></span></p>
+            <div id="modalRequisites"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Datos de la malla curricular
+        const curriculumData = [
+            // Semestre 1
+            {
+                semester: 1,
+                courses: [
+                    { name: "ORIENTACIÓN FARMACÉUTICA I", credits: 2, requisites: [] },
+                    { name: "FÍSICA APLICADA II", credits: 3, requisites: [] },
+                    { name: "MATEMÁTICA APLICADA I", credits: 3, requisites: [] },
+                    { name: "BIOLOGÍA I", credits: 3, requisites: [] },
+                    { name: "QUÍMICA BÁSICA", credits: 6, requisites: [] },
+                    { name: "BOTÁNICA APLICADA I", credits: 2, requisites: [] }
+                ]
+            },
+            // Semestre 2
+            {
+                semester: 2,
+                courses: [
+                    { name: "ORIENTACIÓN FARMACÉUTICA II", credits: 2, requisites: ["ORIENTACIÓN FARMACÉUTICA I"] },
+                    { name: "FÍSICA APLICADA II", credits: 3, requisites: ["FÍSICA APLICADA II"] },
+                    { name: "MATEMÁTICA APLICADA II", credits: 3, requisites: ["MATEMÁTICA APLICADA I"] },
+                    { name: "BIOLOGÍA II", credits: 3, requisites: ["BIOLOGÍA I"] },
+                    { name: "QUÍMICA BÁSICA II", credits: 6, requisites: ["QUÍMICA BÁSICA"] },
+                    { name: "BOTÁNICA APLICADA II", credits: 2, requisites: ["BOTÁNICA APLICADA I"] }
+                ]
+            },
+            // Semestre 3
+            {
+                semester: 3,
+                courses: [
+                    { name: "Estudio y Comprensión del Hombre", credits: 2, requisites: [] },
+                    { name: "Química Inorgánica I", credits: 3, requisites: ["QUÍMICA BÁSICA II"] },
+                    { name: "Química Orgánica I", credits: 4, requisites: ["QUÍMICA BÁSICA II"] },
+                    { name: "Análisis Químico I", credits: 5, requisites: ["QUÍMICA BÁSICA II"] },
+                    { name: "Fisicoquímica I", credits: 3, requisites: ["FÍSICA APLICADA II"] },
+                    { name: "FISIOLOGÍA y ANATOMÍA I", credits: 3, requisites: ["BIOLOGÍA II"] },
+                    { name: "Parasitología", credits: 2, requisites: ["BIOLOGÍA II"] },
+                    { name: "Estadística I", credits: 2, requisites: ["MATEMÁTICA APLICADA II"] },
+                    { name: "Atención Farmacéutica I", credits: 2, requisites: ["ORIENTACIÓN FARMACÉUTICA II"] }
+                ]
+            },
+            // Semestre 4
+            {
+                semester: 4,
+                courses: [
+                    { name: "Química Inorgánica II", credits: 3, requisites: ["Química Inorgánica I"] },
+                    { name: "Química Orgánica II", credits: 5, requisites: ["Química Orgánica I"] },
+                    { name: "Análisis Químico II", credits: 6, requisites: ["Análisis Químico I"] },
+                    { name: "Fisicoquímica II", credits: 3, requisites: ["Fisicoquímica I"] },
+                    { name: "Fisiología y Anatomía II", credits: 3, requisites: ["FISIOLOGÍA y ANATOMÍA I"] },
+                    { name: "Estadística II", credits: 2, requisites: ["Estadística I"] },
+                    { name: "Metodología de la Investigación", credits: 2, requisites: ["Estadística I"] },
+                    { name: "Atención Farmacéutica II", credits: 2, requisites: ["Atención Farmacéutica I"] }
+                ]
+            },
+            // Semestre 5
+            {
+                semester: 5,
+                courses: [
+                    { name: "Química Medicinal I", credits: 3, requisites: ["Química Orgánica II"] },
+                    { name: "Análisis Instrumental I", credits: 3, requisites: ["Análisis Químico II"] },
+                    { name: "Fisiopatología I", credits: 3, requisites: ["Fisiología y Anatomía II"] },
+                    { name: "Salud Pública I", credits: 2, requisites: ["Parasitología"] },
+                    { name: "Bioquímica I", credits: 3, requisites: ["Fisicoquímica II"] },
+                    { name: "Farmacotecnia I", credits: 3, requisites: ["Atención Farmacéutica II"] },
+                    { name: "Legislación Farmacéutica I", credits: 2, requisites: [] },
+                    { name: "Diseño de Proyectos I", credits: 2, requisites: ["Estadística II"] }
+                ]
+            },
+            // Semestre 6
+            {
+                semester: 6,
+                courses: [
+                    { name: "Química Medicinal II", credits: 3, requisites: ["Química Medicinal I"] },
+                    { name: "Análisis Instrumental II", credits: 3, requisites: ["Análisis Instrumental I"] },
+                    { name: "Fisiopatología II", credits: 3, requisites: ["Fisiopatología I"] },
+                    { name: "Salud Pública II", credits: 2, requisites: ["Salud Pública I"] },
+                    { name: "Bioquímica II", credits: 3, requisites: ["Bioquímica I"] },
+                    { name: "Farmacotecnia II", credits: 3, requisites: ["Farmacotecnia I"] },
+                    { name: "Legislación Farmacéutica II", credits: 2, requisites: ["Legislación Farmacéutica I"] },
+                    { name: "Diseño de Proyectos II", credits: 2, requisites: ["Diseño de Proyectos I"] }
+                ]
+            },
+            // Semestre 7
+            {
+                semester: 7,
+                courses: [
+                    { name: "Microbiología I", credits: 3, requisites: ["Salud Pública II"] },
+                    { name: "Farmacología I", credits: 3, requisites: ["Fisiopatología II"] },
+                    { name: "Toxicología I", credits: 3, requisites: ["Bioquímica II"] },
+                    { name: "Farmacognosis I", credits: 3, requisites: ["Química Medicinal II"] },
+                    { name: "Biofarmacia I", credits: 3, requisites: ["Análisis Instrumental II"] },
+                    { name: "Procesos Unitarios I", credits: 3, requisites: ["Análisis Instrumental II"] },
+                    { name: "Higiene y Seguridad Industrial I", credits: 2, requisites: [] },
+                    { name: "Economía Aplicada", credits: 2, requisites: [] },
+                    { name: "Orientación Pasantías Oficina de Farmacia", credits: 2, requisites: ["Farmacotecnia II"] }
+                ]
+            },
+            // Semestre 8
+            {
+                semester: 8,
+                courses: [
+                    { name: "Microbiología II", credits: 3, requisites: ["Microbiología I"] },
+                    { name: "Farmacología II", credits: 3, requisites: ["Farmacología I"] },
+                    { name: "Toxicología II", credits: 3, requisites: ["Toxicología I"] },
+                    { name: "Farmacognosis II", credits: 3, requisites: ["Farmacognosis I"] },
+                    { name: "Biofarmacia II", credits: 3, requisites: ["Biofarmacia I"] },
+                    { name: "Procesos Unitarios II", credits: 3, requisites: ["Procesos Unitarios I"] },
+                    { name: "Higiene y Seguridad Industrial II", credits: 2, requisites: ["Higiene y Seguridad Industrial I"] },
+                    { name: "Administración Aplicada", credits: 2, requisites: ["Economía Aplicada"] },
+                    { name: "Pasantías I Oficina de Farmacia", credits: 2, requisites: ["Orientación Pasantías Oficina de Farmacia"] }
+                ]
+            },
+            // Semestre 9
+            {
+                semester: 9,
+                courses: [
+                    { name: "Primeros Auxilios I", credits: 3, requisites: ["Toxicología II"] },
+                    { name: "Farmacoterapéutica I", credits: 2, requisites: ["Farmacología II"] },
+                    { name: "Bromatología", credits: 3, requisites: ["Microbiología II"] },
+                    { name: "Farmacotecnia III", credits: 3, requisites: ["Procesos Unitarios II"] },
+                    { name: "Dermocosmética I", credits: 3, requisites: ["Farmacognosis II"] },
+                    { name: "Mercadotecnia I", credits: 2, requisites: [] },
+                    { name: "Técnicas Gerenciales I", credits: 2, requisites: ["Administración Aplicada"] },
+                    { name: "Seminario Trabajo Especial de Grado I", credits: 2, requisites: ["Diseño de Proyectos II"] },
+                    { name: "Orientación Pasantías Industriales-Empresas", credits: 2, requisites: ["Pasantías I Oficina de Farmacia"] },
+                    { name: "Farmacia Hospitalaria I", credits: 2, requisites: ["Farmacología II"] }
+                ]
+            },
+            // Semestre 10
+            {
+                semester: 10,
+                courses: [
+                    { name: "Primeros Auxilios II", credits: 3, requisites: ["Primeros Auxilios I"] },
+                    { name: "Farmacoterapéutica II", credits: 2, requisites: ["Farmacoterapéutica I"] },
+                    { name: "Bromatología II", credits: 3, requisites: ["Bromatología"] },
+                    { name: "Farmacotecnia IV", credits: 3, requisites: ["Farmacotecnia III"] },
+                    { name: "Dermocosmética II", credits: 3, requisites: ["Dermocosmética I"] },
+                    { name: "Mercadotecnia II", credits: 2, requisites: ["Mercadotecnia I"] },
+                    { name: "Técnicas Gerenciales II", credits: 2, requisites: [] },
+                    { name: "Seminario Trabajo Especial de Grado II", credits: 2, requisites: ["Seminario Trabajo Especial de Grado I"] },
+                    { name: "Trabajo Especial de Grado", credits: 2, requisites: ["Seminario Trabajo Especial de Grado II"] },
+                    { name: "Pasantías II Industriales-Empresas", credits: 2, requisites: ["Orientación Pasantías Industriales-Empresas"] },
+                    { name: "Farmacia Hospitalaria II", credits: 2, requisites: ["Farmacia Hospitalaria I"] }
+                ]
+            }
+        ];
+
+        // Generar la malla curricular
+        function generateCurriculum() {
+            const container = document.getElementById('semestersContainer');
+            container.innerHTML = '';
+            
+            curriculumData.forEach(semesterData => {
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'semester';
+                semesterDiv.dataset.semester = semesterData.semester;
+                
+                const title = document.createElement('div');
+                title.className = 'semester-title';
+                title.textContent = `Semestre ${semesterData.semester}`;
+                semesterDiv.appendChild(title);
+                
+                semesterData.courses.forEach(course => {
+                    const courseDiv = document.createElement('div');
+                    courseDiv.className = 'course';
+                    courseDiv.onclick = function() { showCourseModal(course, semesterData.semester); };
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'course-name';
+                    nameDiv.textContent = course.name;
+                    
+                    const creditsSpan = document.createElement('span');
+                    creditsSpan.className = 'course-credits';
+                    creditsSpan.textContent = `${course.credits} créditos`;
+                    
+                    const reqDiv = document.createElement('div');
+                    reqDiv.className = 'course-req';
+                    reqDiv.textContent = course.requisites.length > 0 ? 
+                        `Requisitos: ${course.requisites.join(', ')}` : 'No tiene requisitos';
+                    
+                    courseDiv.appendChild(nameDiv);
+                    courseDiv.appendChild(creditsSpan);
+                    courseDiv.appendChild(reqDiv);
+                    semesterDiv.appendChild(courseDiv);
+                });
+                
+                container.appendChild(semesterDiv);
+            });
+        }
+
+        // Mostrar modal con detalles del curso
+        function showCourseModal(course, semester) {
+            const modal = document.getElementById('courseModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalCredits = document.getElementById('modalCredits');
+            const modalSemester = document.getElementById('modalSemester');
+            const modalRequisites = document.getElementById('modalRequisites');
+            
+            modalTitle.textContent = course.name;
+            modalCredits.textContent = course.credits;
+            modalSemester.textContent = semester;
+            
+            if (course.requisites.length > 0) {
+                modalRequisites.innerHTML = `<strong>Requisitos:</strong><ul>${course.requisites.map(req => `<li>${req}</li>`).join('')}</ul>`;
+            } else {
+                modalRequisites.innerHTML = '<p>No tiene requisitos</p>';
+            }
+            
+            modal.style.display = 'block';
+            
+            // Cerrar modal al hacer clic en la X
+            document.getElementsByClassName('close')[0].onclick = function() {
+                modal.style.display = 'none';
+            }
+            
+            // Cerrar modal al hacer clic fuera del contenido
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        // Función de búsqueda
+        function searchCourses() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const courses = document.getElementsByClassName('course-name');
+            
+            for (let i = 0; i < courses.length; i++) {
+                const courseName = courses[i].textContent || courses[i].innerText;
+                if (courseName.toUpperCase().indexOf(filter) > -1) {
+                    courses[i].parentElement.style.display = "";
+                    
+                    // Resaltar texto coincidente
+                    if (filter !== '') {
+                        const regex = new RegExp(filter, 'gi');
+                        courses[i].innerHTML = courseName.replace(regex, match => `<span class="highlight">${match}</span>`);
+                    } else {
+                        courses[i].innerHTML = courseName;
+                    }
+                } else {
+                    courses[i].parentElement.style.display = "none";
+                }
+            }
+        }
+
+        // Filtrar por semestre
+        function filterSemesters(semester) {
+            const semesters = document.getElementsByClassName('semester');
+            const buttons = document.getElementsByClassName('filter-btn');
+            
+            // Actualizar botones activos
+            for (let i = 0; i < buttons.length; i++) {
+                if (buttons[i].textContent.includes(semester) || (semester === 'all' && buttons[i].textContent === 'Todos')) {
+                    buttons[i].classList.add('active');
+                } else {
+                    buttons[i].classList.remove('active');
+                }
+            }
+            
+            // Mostrar/ocultar semestres
+            for (let i = 0; i < semesters.length; i++) {
+                if (semester === 'all' || semesters[i].dataset.semester === semester) {
+                    semesters[i].style.display = 'block';
+                } else {
+                    semesters[i].style.display = 'none';
+                }
+            }
+        }
+
+        // Inicializar la malla al cargar la página
+        window.onload = function() {
+            generateCurriculum();
+        };
+    </script>
+</body>
+</html>
