@@ -2,14 +2,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;700&display=swap');
 
 :root {
+    /* Paleta de colores pastel y suaves */
     --pastel-blue: #ADD8E6; /* Azul claro pastel */
     --pastel-purple: #B19CD9; /* Morado claro pastel */
     --soft-white: #F8F8FF; /* Blanco suave, casi lavanda */
     --dark-text: #4A4A68; /* Texto oscuro para contraste */
-    --light-text: #6A6A80; /* Texto más claro */
+    --light-text: #6A6A80; /* Texto más claro para descripciones */
+
+    /* Colores para interactividad y estados */
     --hover-blue: #9AC0DC; /* Azul un poco más oscuro para hover */
-    --prereq-highlight: #FFDAB9; /* Melocotón suave para prerrequisitos */
-    --met-prereq-highlight: #C2E0C2; /* Verde suave para prerrequisitos cumplidos */
+    --selected-course-bg: #8A72B3; /* Morado más profundo para curso seleccionado */
+    --approved-course-bg: #C2E0C2; /* Verde pastel para curso aprobado */
+    --approved-course-border: #8BC34A; /* Borde verde para aprobado */
+    --unlocked-course-bg: #FFE0B2; /* Naranja pastel para curso desbloqueado */
+    --unlocked-course-border: #FFB74D; /* Borde naranja para desbloqueado */
+    --locked-course-bg: #E0E0E0; /* Gris claro para curso bloqueado */
+    --locked-course-text: #A0A0A0; /* Texto gris para bloqueado */
 }
 
 body {
@@ -22,7 +30,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh; /* Para que el fondo cubra toda la altura */
+    min-height: 100vh;
+    box-sizing: border-box; /* Asegura que padding y border no aumenten el tamaño total */
 }
 
 header {
@@ -42,6 +51,7 @@ header h1 {
     font-weight: 700;
     margin-bottom: 10px;
     font-size: 2.8em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 header p {
@@ -53,10 +63,10 @@ header p {
 /* Contenedor de la Malla */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas responsivas */
-    gap: 30px; /* Espacio entre semestres */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
     width: 100%;
-    max-width: 1400px; /* Limita el ancho máximo para mejor lectura */
+    max-width: 1400px;
     padding: 20px;
 }
 
@@ -67,7 +77,7 @@ header p {
     padding: 25px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-    border: 1px solid rgba(177, 156, 217, 0.3); /* Borde sutil del color pastel */
+    border: 1px solid rgba(177, 156, 217, 0.3);
 }
 
 .semester:hover {
@@ -92,10 +102,10 @@ header p {
     margin-bottom: 15px;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(173, 216, 230, 0.5); /* Borde sutil del color pastel azul */
-    position: relative; /* Para el tooltip de créditos si lo usas */
-    overflow: hidden; /* Para el brillo en hover */
+    transition: all 0.3s ease; /* Transición para todos los cambios */
+    border: 1px solid rgba(173, 216, 230, 0.5);
+    position: relative;
+    overflow: hidden;
 }
 
 .course:last-child {
@@ -116,21 +126,20 @@ header p {
     font-weight: 400;
 }
 
-/* Efectos de Interacción */
-.course:hover {
+/* Efectos de Interacción (Hover) */
+.course:not(.approved):not(.locked):hover {
     background-color: var(--hover-blue);
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-    color: white; /* Texto blanco en hover */
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.course:hover h3,
-.course:hover p {
-    color: white; /* Asegura que el texto también cambie de color */
+.course:not(.approved):not(.locked):hover h3,
+.course:not(.approved):not(.locked):hover p {
+    color: white;
 }
 
 /* Brillo en hover */
-.course:hover::before {
+.course:not(.approved):not(.locked):hover::before {
     content: '';
     position: absolute;
     top: 0;
@@ -142,13 +151,15 @@ header p {
     transition: opacity 0.3s ease-out;
 }
 
-/* Estado de asignatura "seleccionada" (hacer clic) */
+/* ESTADOS DE LOS CURSOS */
+
+/* Estado Seleccionado (al hacer click, antes de "aprobar") */
 .course.selected {
-    background-color: var(--pastel-purple);
+    background-color: var(--selected-course-bg);
     color: white;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     transform: scale(1.02);
-    border-color: var(--pastel-blue); /* Borde más pronunciado */
+    border-color: var(--pastel-blue);
 }
 
 .course.selected h3,
@@ -156,19 +167,78 @@ header p {
     color: white;
 }
 
-/* Destacar prerrequisitos */
-.course.prerequisite-of-selected {
-    background-color: var(--prereq-highlight); /* Color para prerrequisitos de la seleccionada */
-    border-color: #FFA07A; /* Borde más cálido */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-    transform: scale(1.01);
+/* Estado APROBADO */
+.course.approved {
+    background-color: var(--approved-course-bg);
+    border: 2px solid var(--approved-course-border);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: default; /* Ya no es clicable para aprobar */
+    opacity: 0.9;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Destacar asignaturas que tienen como prerrequisito a la seleccionada (dependientes) */
-.course.dependency-of-selected {
-    background-color: var(--met-prereq-highlight); /* Color para las que dependen de la seleccionada */
-    border-color: #90EE90; /* Borde más fresco */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+.course.approved h3,
+.course.approved p {
+    color: #33691E; /* Verde oscuro para texto */
+}
+
+/* Icono de checkmark para cursos aprobados */
+.course.approved::after {
+    content: '✔';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5em;
+    color: #33691E;
+    opacity: 0.7;
+    animation: bounceIn 0.5s ease-out;
+}
+
+
+/* Estado BLOQUEADO (por requisitos) */
+.course.locked {
+    background-color: var(--locked-course-bg);
+    color: var(--locked-course-text);
+    cursor: not-allowed; /* Indica que no se puede hacer clic */
+    opacity: 0.7;
+    border: 1px dashed rgba(160, 160, 160, 0.5);
+    box-shadow: none; /* Sin sombra para que se vea "desactivado" */
+}
+
+.course.locked h3,
+.course.locked p {
+    color: var(--locked-course-text);
+}
+
+/* Estado DESBLOQUEADO (pero aún no aprobado) */
+.course.unlocked {
+    background-color: var(--unlocked-course-bg);
+    border: 2px solid var(--unlocked-course-border);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: fadeInUnlocked 0.5s ease-out; /* Animación al desbloquear */
+}
+
+.course.unlocked h3 {
+    color: #E65100; /* Naranja oscuro para texto */
+}
+.course.unlocked p {
+    color: #FB8C00;
+}
+
+
+/* Resaltado de prerrequisitos y dependencias al seleccionar */
+/* El curso seleccionado resalta sus prerrequisitos (si no están aprobados) */
+.course.selected + .course.prerequisite-of-selected:not(.approved) {
+    background-color: var(--unlocked-course-bg);
+    border-color: var(--unlocked-course-border);
+}
+
+/* Asignaturas que tienen como prerrequisito la seleccionada (dependientes) */
+.course.dependency-of-selected:not(.approved):not(.locked) {
+    background-color: var(--hover-blue); /* Puede ser el mismo color que el hover o uno específico */
+    border-color: var(--pastel-blue);
     transform: scale(1.01);
 }
 
@@ -183,12 +253,23 @@ header p {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.course {
-    animation: fadeInItem 0.5s ease-out forwards;
-    opacity: 0; /* Asegura que no se vea antes de la animación */
+@keyframes fadeInUnlocked {
+    from { opacity: 0.5; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
 }
 
-/* Retraso de animación para cada curso */
+@keyframes bounceIn {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.course {
+    animation: fadeInItem 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+/* Retraso de animación para cada curso (para un efecto escalonado) */
 .semester:nth-child(1) .course { animation-delay: 0.1s; }
 .semester:nth-child(2) .course { animation-delay: 0.2s; }
 .semester:nth-child(3) .course { animation-delay: 0.3s; }
@@ -227,7 +308,7 @@ header p {
         font-size: 1em;
     }
     .grid-container {
-        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+        grid-template-columns: 1fr;
         gap: 20px;
     }
     .semester {
